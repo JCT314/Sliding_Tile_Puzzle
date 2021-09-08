@@ -15,11 +15,54 @@
 const gridRows = 4;
 const gridCols = 4;
 const grid = buildGrid(gridRows, gridCols);
+// const finishedGrid = buildGrid();
 
-const [startRow, startCol] = shuffleGrid(grid, gridRows - 1, gridCols - 1, []);
+let [currentRow, currentCol] = shuffleGrid(grid, gridRows - 1, gridCols - 1, []);
 
 renderGrid();
-console.log(startRow, startCol);
+
+function swapTile(blankRow, blankCol, otherRow, otherCol) {
+    const blank = grid[blankRow][blankCol];
+    grid[blankRow][blankCol] = grid[otherRow][otherCol];
+    grid[otherRow][otherCol] = blank;
+    currentRow = otherRow;
+    currentCol = otherCol;
+}
+
+document.body.addEventListener("keyup", (e) => {
+    console.log(e.keyCode);
+    if (e.keyCode === 38) {
+        if (isDirectionValid(currentRow - 1, currentCol)) {
+            swapTile(currentRow, currentCol, currentRow - 1, currentCol);
+            renderGrid();
+        }
+        console.log("up");
+    }
+
+    if (e.keyCode === 40) {
+        if (isDirectionValid(currentRow + 1, currentCol)) {
+            swapTile(currentRow, currentCol, currentRow + 1, currentCol);
+            renderGrid();
+        }
+        console.log("down");
+    }
+
+    if (e.keyCode === 37) {
+        if (isDirectionValid(currentRow, currentCol - 1)) {
+            swapTile(currentRow, currentCol, currentRow, currentCol - 1);
+            renderGrid();
+        }
+        console.log("left");
+    }
+
+    if (e.keyCode === 39) {
+        if (isDirectionValid(currentRow, currentCol + 1)) {
+            swapTile(currentRow, currentCol, currentRow, currentCol + 1);
+            renderGrid();
+        }
+        console.log("right");
+    }
+});
 
 function renderGrid() {
     const htmlGrid = getHtmlGrid();
@@ -72,6 +115,13 @@ function getValidDirections(directions, maxRows, maxCols) {
         }
     }
     return validDirections;
+}
+
+function isDirectionValid(row, col) {
+    if (row >= 0 && row < gridRows && col >= 0 && col < gridCols) {
+        return true;
+    }
+    return false;
 }
 
 
