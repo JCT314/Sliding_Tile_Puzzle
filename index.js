@@ -1,7 +1,7 @@
 /*
     1) set up a grid
     2) how to move tiles
-    3) look up algorithm to shuffle tiles
+    3) look up algorithm to shuffle tiles * need to adjust algorithm
     4) how to render the grid
         a) how to add an animation
 
@@ -15,52 +15,47 @@
 const gridRows = 4;
 const gridCols = 4;
 const grid = buildGrid(gridRows, gridCols);
+const up = 38;
+const down = 40;
+const left = 37;
+const right = 39;
 // const finishedGrid = buildGrid();
 
 let [currentRow, currentCol] = shuffleGrid(grid, gridRows - 1, gridCols - 1, []);
 
 renderGrid();
 
-function swapTile(blankRow, blankCol, otherRow, otherCol) {
-    const blank = grid[blankRow][blankCol];
-    grid[blankRow][blankCol] = grid[otherRow][otherCol];
+function swap(row, col, otherRow, otherCol) {
+    const blank = grid[row][col];
+    grid[row][col] = grid[otherRow][otherCol];
     grid[otherRow][otherCol] = blank;
     currentRow = otherRow;
     currentCol = otherCol;
 }
 
+function moveTile(newRow, newCol) {
+    if (isDirectionValid(newRow, newCol)) {
+        swap(currentRow, currentCol, newRow, newCol);
+        renderGrid();
+    }
+}
+
 document.body.addEventListener("keyup", (e) => {
-    console.log(e.keyCode);
-    if (e.keyCode === 38) {
-        if (isDirectionValid(currentRow - 1, currentCol)) {
-            swapTile(currentRow, currentCol, currentRow - 1, currentCol);
-            renderGrid();
-        }
-        console.log("up");
+    // console.log(e.keyCode);
+    if (e.keyCode === up) {
+        moveTile(currentRow + 1, currentCol);
     }
 
-    if (e.keyCode === 40) {
-        if (isDirectionValid(currentRow + 1, currentCol)) {
-            swapTile(currentRow, currentCol, currentRow + 1, currentCol);
-            renderGrid();
-        }
-        console.log("down");
+    if (e.keyCode === down) {
+        moveTile(currentRow - 1, currentCol);
     }
 
-    if (e.keyCode === 37) {
-        if (isDirectionValid(currentRow, currentCol - 1)) {
-            swapTile(currentRow, currentCol, currentRow, currentCol - 1);
-            renderGrid();
-        }
-        console.log("left");
+    if (e.keyCode === left) {
+        moveTile(currentRow, currentCol + 1);
     }
 
-    if (e.keyCode === 39) {
-        if (isDirectionValid(currentRow, currentCol + 1)) {
-            swapTile(currentRow, currentCol, currentRow, currentCol + 1);
-            renderGrid();
-        }
-        console.log("right");
+    if (e.keyCode === right) {
+        moveTile(currentRow, currentCol - 1);
     }
 });
 
@@ -82,20 +77,17 @@ function getHtmlGrid() {
 }
 
 function shuffleGrid(grid, blankRow, blankCol, visitedDirections) {
-    const maxRows = grid.length;
-    const maxCols = grid[0].length;
     let currentRow = blankRow;
     let currentCol = blankCol;
 
-    for (let i = 0; i < maxRows * maxCols; i++) {
+    for (let i = 0; i < gridRows * gridCols; i++) {
         const up = [currentRow - 1, currentCol, "up"];
         const down = [currentRow + 1, currentCol, "down"];
         const left = [currentRow, currentCol - 1, "left"];
         const right = [currentRow, currentCol + 1, "right"];
         const directions = [up, down, left, right];
-        const validDirections = getValidDirections(directions, maxRows, maxCols);
+        const validDirections = getValidDirections(directions, gridRows, gridCols);
         shuffleDirections(validDirections);
-        // pick the first direction
         const [nextRow, nextCol] = validDirections[0];
         const blank = grid[currentRow][currentCol];
         grid[currentRow][currentCol] = grid[nextRow][nextCol];
