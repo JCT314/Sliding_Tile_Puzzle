@@ -1,0 +1,28 @@
+body {
+    background-color: rgb(146, 250, 114);
+    padding-top: 50px;
+}
+
+#container {
+    width: 400px;
+    display: grid;
+    grid-template-columns: repeat(4, 100px);
+    grid-auto-rows: minmax(100px,auto);
+    box-sizing: border-box;
+    border-top: 2px solid black;
+    border-left: 2px solid black;
+    border-collapse: collapse;
+    margin: 0px auto;
+    /* grid-template-rows: 100px 100px 100px 100px; */
+    
+}
+
+.tile {
+    box-sizing: border-box;
+   background-color: rgb(74, 221, 37);
+   padding: 20px;
+   line-height: 50px;
+   text-align: center;
+   border-bottom: 2px solid black;
+    border-right: 2px solid black;
+}
