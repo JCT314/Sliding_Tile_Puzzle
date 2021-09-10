@@ -8,8 +8,10 @@
         a) once you beat it, get a url that you can send to your friends so they get the same set up
         and can compete with them
 */
-const gridRows = 4;
-const gridCols = 4;
+
+
+const gridRows = 3;
+const gridCols = 3;
 const grid = buildGrid(gridRows, gridCols);
 const correctGrid = buildGrid(gridRows, gridCols);
 const up = 38;
@@ -18,11 +20,19 @@ const left = 37;
 const right = 39;
 const directionCodes = [up, down, left, right];
 const container = document.querySelector('#container');
+const resetButton = document.querySelector('button');
 let timerID;
 
-let [currentRow, currentCol] = shuffleGrid(grid, gridRows - 1, gridCols - 1, []);
+let [currentRow, currentCol] = shuffleGrid(grid, gridRows - 1, gridCols - 1,);
 
 renderGrid();
+
+resetButton.addEventListener("click", () => {
+    container.innerHTML = "";
+    [currentRow, currentCol] = shuffleGrid(grid, currentRow, currentCol);
+    renderGrid();
+    console.log(currentRow, currentCol);
+});
 
 function didUserWin() {
     for (let i = 0; i < gridRows; i++) {
@@ -51,7 +61,7 @@ function moveTile(newRow, newCol) {
     return false;
 }
 
-document.body.addEventListener("keyup", (e) => {
+function onKeyUp(e) {
     if (directionCodes.includes(e.keyCode)) {
         let tileMoved = false;
         let index;
@@ -122,16 +132,22 @@ document.body.addEventListener("keyup", (e) => {
                     if (direction === "right") {
                         divs[index].classList.toggle('moveRight');
                     }
+
                     moveTile(nextRow, nextCol);
                     renderGrid();
                     if (didUserWin()) {
                         console.log('you win!');
+                        document.body.removeEventListener("keyup", onKeyUp);
+                        const h1 = document.getElementById('win-message');
+                        h1.innerText = "You Win!";
                     }
-                }, 500);
+                }, 300);
             }
         }
     }
-});
+}
+
+document.body.addEventListener("keyup", onKeyUp);
 
 function renderGrid() {
     const htmlGrid = getHtmlGrid();
@@ -224,3 +240,7 @@ function buildGrid(rows, columns) {
     }
     return grid;
 }
+
+
+// want to implement yates shuffling algo
+// check inversions
