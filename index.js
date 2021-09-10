@@ -1,9 +1,5 @@
 /*
-    1) set up a grid
-    2) how to move tiles
     3) look up algorithm to shuffle tiles * need to adjust algorithm
-    4) how to render the grid
-        a) how to add an animation
 
     Eventually
     1) let a user set a grid size
@@ -15,6 +11,7 @@
 const gridRows = 4;
 const gridCols = 4;
 const grid = buildGrid(gridRows, gridCols);
+const correctGrid = buildGrid(gridRows, gridCols);
 const up = 38;
 const down = 40;
 const left = 37;
@@ -22,11 +19,21 @@ const right = 39;
 const directionCodes = [up, down, left, right];
 const container = document.querySelector('#container');
 let timerID;
-// const finishedGrid = buildGrid();
 
 let [currentRow, currentCol] = shuffleGrid(grid, gridRows - 1, gridCols - 1, []);
 
 renderGrid();
+
+function didUserWin() {
+    for (let i = 0; i < gridRows; i++) {
+        for (let j = 0; j < gridCols; j++) {
+            if (correctGrid[i][j] !== grid[i][j]) {
+                return false;
+            }
+        }
+    }
+    return true;
+}
 
 function swap(row, col, otherRow, otherCol) {
     const blank = grid[row][col];
@@ -117,6 +124,9 @@ document.body.addEventListener("keyup", (e) => {
                     }
                     moveTile(nextRow, nextCol);
                     renderGrid();
+                    if (didUserWin()) {
+                        console.log('you win!');
+                    }
                 }, 500);
             }
         }
