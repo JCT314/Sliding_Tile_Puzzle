@@ -19,6 +19,9 @@ const up = 38;
 const down = 40;
 const left = 37;
 const right = 39;
+const directionCodes = [up, down, left, right];
+const container = document.querySelector('#container');
+let timerID;
 // const finishedGrid = buildGrid();
 
 let [currentRow, currentCol] = shuffleGrid(grid, gridRows - 1, gridCols - 1, []);
@@ -36,32 +39,92 @@ function swap(row, col, otherRow, otherCol) {
 function moveTile(newRow, newCol) {
     if (isDirectionValid(newRow, newCol)) {
         swap(currentRow, currentCol, newRow, newCol);
-        renderGrid();
+        return true;
     }
+    return false;
 }
 
 document.body.addEventListener("keyup", (e) => {
-    // console.log(e.keyCode);
-    if (e.keyCode === up) {
-        moveTile(currentRow + 1, currentCol);
-    }
+    if (directionCodes.includes(e.keyCode)) {
+        let tileMoved = false;
+        let index;
+        let nextRow;
+        let nextCol;
+        if (!timerID) {
+            const divs = container.querySelectorAll('div');
+            let direction;
+            if (e.keyCode === up) {
+                nextRow = currentRow + 1;
+                nextCol = currentCol;
+                tileMoved = isDirectionValid(nextRow, nextCol);
+                index = nextRow * gridRows + nextCol;
+                if (tileMoved) {
+                    console.log(divs[index]);
+                    divs[index].classList.toggle('moveUp');
+                    direction = "up";
+                }
+            }
 
-    if (e.keyCode === down) {
-        moveTile(currentRow - 1, currentCol);
-    }
+            if (e.keyCode === down) {
+                nextRow = currentRow - 1;
+                nextCol = currentCol;
+                tileMoved = isDirectionValid(nextRow, nextCol);
+                index = nextRow * gridRows + nextCol;
+                if (tileMoved) {
+                    console.log(divs[index]);
+                    divs[index].classList.toggle('moveDown');
+                    direction = "down";
+                }
+            }
 
-    if (e.keyCode === left) {
-        moveTile(currentRow, currentCol + 1);
-    }
+            if (e.keyCode === left) {
+                nextRow = currentRow;
+                nextCol = currentCol + 1;
+                tileMoved = isDirectionValid(nextRow, nextCol);
+                index = nextRow * gridRows + nextCol;
+                if (tileMoved) {
+                    console.log(divs[index]);
+                    divs[index].classList.toggle('moveLeft');
+                    direction = "left";
+                }
+            }
 
-    if (e.keyCode === right) {
-        moveTile(currentRow, currentCol - 1);
+            if (e.keyCode === right) {
+                nextRow = currentRow;
+                nextCol = currentCol - 1;
+                tileMoved = isDirectionValid(currentRow, nextCol);
+                index = nextRow * gridRows + nextCol;
+                if (tileMoved) {
+                    console.log(divs[index]);
+                    divs[index].classList.toggle('moveRight');
+                    direction = "right";
+                }
+            }
+            if (tileMoved) {
+                timerID = setTimeout(() => {
+                    timerID = null;
+                    if (direction === "up") {
+                        divs[index].classList.toggle('moveUp');
+                    }
+                    if (direction === "down") {
+                        divs[index].classList.toggle('moveDown');
+                    }
+                    if (direction === "left") {
+                        divs[index].classList.toggle('moveLeft');
+                    }
+                    if (direction === "right") {
+                        divs[index].classList.toggle('moveRight');
+                    }
+                    moveTile(nextRow, nextCol);
+                    renderGrid();
+                }, 500);
+            }
+        }
     }
 });
 
 function renderGrid() {
     const htmlGrid = getHtmlGrid();
-    const container = document.querySelector('#container');
     container.innerHTML = htmlGrid;
 }
 
@@ -69,14 +132,19 @@ function getHtmlGrid() {
     let htmlGrid = "";
     for (let i = 0; i < gridRows; i++) {
         for (let j = 0; j < gridCols; j++) {
-            const div = `<div class="tile">${grid[i][j]}</div>`;
+            let div;
+            if (grid[i][j] === "") {
+                div = `<div class="blank">${grid[i][j]}</div>`;
+            } else {
+                div = `<div class="tile">${grid[i][j]}</div>`;
+            }
             htmlGrid += div;
         }
     }
     return htmlGrid;
 }
 
-function shuffleGrid(grid, blankRow, blankCol, visitedDirections) {
+function shuffleGrid(grid, blankRow, blankCol) {
     let currentRow = blankRow;
     let currentCol = blankCol;
 

@@ -7,19 +7,47 @@ body {
     width: 400px;
     display: grid;
     grid-template-columns: repeat(4, 100px);
-    grid-auto-rows: minmax(100px,auto);
-    box-sizing: border-box;
-    border-top: 2px solid black;
-    border-left: 2px solid black;
+    grid-auto-rows: minmax(100px,100px);
+    border: 10px solid black;
     margin: 0px auto;
+    background-color: darkgreen;
 }
 
 .tile {
-    box-sizing: border-box;
     background-color: rgb(74, 221, 37);
     padding: 20px;
     line-height: 50px;
     text-align: center;
-    border-bottom: 2px solid black;
-    border-right: 2px solid black;
+    border: .5px black solid;
+    border-collapse: separate;
+}
+
+/* .tile:hover {
+    transition: transform .5s ease-in;
+    transform: translateX(-100px);
+} */
+
+.moveRight {
+    transition: transform .5s ease-in;
+    transform: translateX(100px);
+}
+
+.moveLeft {
+    transition: transform .5s ease-in;
+    transform: translateX(-100px);
+}
+
+.moveUp {
+    transition: transform .5s ease-in;
+    transform: translateY(-100px);
+}
+
+.moveDown {
+    transition: transform .5s ease-in;
+    transform: translateY(100px);
+}
+
+.blank {
+    background-color: none;
+    border: .5px black solid;
 }
