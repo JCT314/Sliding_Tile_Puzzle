@@ -13,6 +13,11 @@ body {
     background-color: darkgreen;
 }
 
+.spin {
+    transition: transform 1s ease-in;
+    transform: rotate(360deg);
+}
+
 .tile {
     background-color: rgb(74, 221, 37);
     padding: 20px;
@@ -20,6 +25,7 @@ body {
     text-align: center;
     border: .5px black solid;
     border-collapse: separate;
+    font-size: 150%;
 }
 
 .moveRight {

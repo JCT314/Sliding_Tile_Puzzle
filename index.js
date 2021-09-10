@@ -19,6 +19,7 @@ const down = 40;
 const left = 37;
 const right = 39;
 const directionCodes = [up, down, left, right];
+const h1 = document.getElementById('win-message');
 const container = document.querySelector('#container');
 const resetButton = document.querySelector('button');
 let timerID;
@@ -30,8 +31,9 @@ renderGrid();
 resetButton.addEventListener("click", () => {
     container.innerHTML = "";
     [currentRow, currentCol] = shuffleGrid(grid, currentRow, currentCol);
+    h1.innerText = "";
+    document.body.addEventListener("keyup", onKeyUp);
     renderGrid();
-    console.log(currentRow, currentCol);
 });
 
 function didUserWin() {
@@ -76,7 +78,6 @@ function onKeyUp(e) {
                 tileMoved = isDirectionValid(nextRow, nextCol);
                 index = nextRow * gridRows + nextCol;
                 if (tileMoved) {
-                    console.log(divs[index]);
                     divs[index].classList.toggle('moveUp');
                     direction = "up";
                 }
@@ -88,7 +89,6 @@ function onKeyUp(e) {
                 tileMoved = isDirectionValid(nextRow, nextCol);
                 index = nextRow * gridRows + nextCol;
                 if (tileMoved) {
-                    console.log(divs[index]);
                     divs[index].classList.toggle('moveDown');
                     direction = "down";
                 }
@@ -100,7 +100,6 @@ function onKeyUp(e) {
                 tileMoved = isDirectionValid(nextRow, nextCol);
                 index = nextRow * gridRows + nextCol;
                 if (tileMoved) {
-                    console.log(divs[index]);
                     divs[index].classList.toggle('moveLeft');
                     direction = "left";
                 }
@@ -112,7 +111,6 @@ function onKeyUp(e) {
                 tileMoved = isDirectionValid(currentRow, nextCol);
                 index = nextRow * gridRows + nextCol;
                 if (tileMoved) {
-                    console.log(divs[index]);
                     divs[index].classList.toggle('moveRight');
                     direction = "right";
                 }
@@ -136,10 +134,12 @@ function onKeyUp(e) {
                     moveTile(nextRow, nextCol);
                     renderGrid();
                     if (didUserWin()) {
-                        console.log('you win!');
                         document.body.removeEventListener("keyup", onKeyUp);
-                        const h1 = document.getElementById('win-message');
                         h1.innerText = "You Win!";
+                        container.classList.add('spin');
+                        setTimeout(() => {
+                            container.classList.remove('spin');
+                        }, 1000);
                     }
                 }, 300);
             }
