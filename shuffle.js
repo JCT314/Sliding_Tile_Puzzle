@@ -43,6 +43,7 @@ function isSolvable(arr) {
 }
 
 function makeSolvable(arr) {
+    flag = false;
     for (let i = 0; i < arr.length - 1; i++) {
         if (arr[i] === 0) {
             continue;
@@ -50,8 +51,12 @@ function makeSolvable(arr) {
         for (let j = i + 1; j < arr.length; j++) {
             if (arr[i] > arr[j] && arr[j] !== 0) {
                 swapTiles(i, j, arr);
+                flag = true;
                 break;
             }
+        }
+        if (flag) {
+            break;
         }
     }
 }

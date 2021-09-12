@@ -8,18 +8,20 @@
         a) once you beat it, get a url that you can send to your friends so they get the same set up
         and can compete with them
 */
-const up = 38;
-const down = 40;
-const left = 37;
-const right = 39;
+const up = 87;
+const down = 83;
+const left = 65;
+const right = 68;
 let tileWidth;
-let rows = 7;
-let cols = 7;
+let rows = 3;
+let cols = 3;
+
 const directionCodes = [up, down, left, right];
 let timerID;
 const h1 = document.getElementById('win-message');
 const container = document.querySelector('#container');
 const resetButton = document.querySelector('button');
+const select = document.querySelector('select');
 let playerGrid = new Grid(rows, cols);
 playerGrid.buildShuffledGrid();
 document.body.addEventListener("keyup", onKeyUp(playerGrid));
@@ -27,9 +29,34 @@ document.body.addEventListener("keyup", onKeyUp(playerGrid));
 setUpCSS();
 renderGrid();
 
+select.addEventListener('input', (e) => {
+    console.log(e);
+    container.innerHTML = "";
+    let value = e.target.value;
+    console.log(e.target.value);
+    rows = cols = value;
+    console.log(rows, cols);
+    playerGrid = new Grid(rows, cols);
+    playerGrid.buildShuffledGrid();
+    setUpCSS();
+    renderGrid();
+    document.removeEventListener("keyup", onKeyUp);
+    document.body.addEventListener("keyup", onKeyUp(playerGrid));
+    select.returnV
+});
+
+resetButton.addEventListener("click", () => {
+    container.innerHTML = "";
+    playerGrid = new Grid(rows, cols);
+    playerGrid.buildShuffledGrid();
+    h1.innerText = "";
+    document.body.removeEventListener("keyup", onKeyUp);
+    document.body.addEventListener("keyup", onKeyUp(playerGrid));
+    renderGrid();
+});
+
 function setUpCSS() {
     container.style.gridTemplateColumns = `repeat(${playerGrid.gridRows},${100 / playerGrid.gridRows}%)`;
-    console.log(container);
 }
 
 function renderGrid() {
@@ -53,20 +80,9 @@ function getHtmlGrid(grid) {
     return htmlGrid;
 }
 
-resetButton.addEventListener("click", () => {
-    container.innerHTML = "";
-    playerGrid = new Grid(rows, cols);
-    playerGrid.buildShuffledGrid();
-    h1.innerText = "";
-    document.body.removeEventListener("keyup", onKeyUp);
-    document.body.addEventListener("keyup", onKeyUp);
-    renderGrid();
-});
-
 function onKeyUp() {
     return (e) => {
         tileWidth = container.querySelector('div').clientWidth;
-        console.log(tileWidth);
         if (directionCodes.includes(e.keyCode)) {
             let tileMoved = false;
             let index;
