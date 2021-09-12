@@ -12,8 +12,9 @@ const up = 38;
 const down = 40;
 const left = 37;
 const right = 39;
-let rows = 3;
-let cols = 3;
+let tileWidth;
+let rows = 7;
+let cols = 7;
 const directionCodes = [up, down, left, right];
 let timerID;
 const h1 = document.getElementById('win-message');
@@ -23,7 +24,13 @@ let playerGrid = new Grid(rows, cols);
 playerGrid.buildShuffledGrid();
 document.body.addEventListener("keyup", onKeyUp(playerGrid));
 
+setUpCSS();
 renderGrid();
+
+function setUpCSS() {
+    container.style.gridTemplateColumns = `repeat(${playerGrid.gridRows},${100 / playerGrid.gridRows}%)`;
+    console.log(container);
+}
 
 function renderGrid() {
     const htmlGrid = getHtmlGrid(playerGrid);
@@ -58,6 +65,8 @@ resetButton.addEventListener("click", () => {
 
 function onKeyUp() {
     return (e) => {
+        tileWidth = container.querySelector('div').clientWidth;
+        console.log(tileWidth);
         if (directionCodes.includes(e.keyCode)) {
             let tileMoved = false;
             let index;
@@ -72,8 +81,8 @@ function onKeyUp() {
                     tileMoved = playerGrid.isDirectionValid(nextRow, nextCol);
                     index = nextRow * playerGrid.gridRows + nextCol;
                     if (tileMoved) {
-                        divs[index].classList.toggle('moveUp');
-                        direction = "up";
+                        divs[index].style.transition = `transform .3s ease-in`;
+                        divs[index].style.transform = `translateY(${-tileWidth}px)`;
                     }
                 }
 
@@ -83,8 +92,9 @@ function onKeyUp() {
                     tileMoved = playerGrid.isDirectionValid(nextRow, nextCol);
                     index = nextRow * playerGrid.gridRows + nextCol;
                     if (tileMoved) {
-                        divs[index].classList.toggle('moveDown');
-                        direction = "down";
+                        divs[index].style.transition = `transform .3s ease-in`;
+                        divs[index].style.transform = `translateY(${tileWidth}px)`;
+
                     }
                 }
 
@@ -94,8 +104,8 @@ function onKeyUp() {
                     tileMoved = playerGrid.isDirectionValid(nextRow, nextCol);
                     index = nextRow * playerGrid.gridRows + nextCol;
                     if (tileMoved) {
-                        divs[index].classList.toggle('moveLeft');
-                        direction = "left";
+                        divs[index].style.transition = `transform .3s ease-in`;
+                        divs[index].style.transform = `translateX(${-tileWidth}px)`;
                     }
                 }
 
@@ -105,25 +115,15 @@ function onKeyUp() {
                     tileMoved = playerGrid.isDirectionValid(playerGrid.currentRow, nextCol);
                     index = nextRow * playerGrid.gridRows + nextCol;
                     if (tileMoved) {
-                        divs[index].classList.toggle('moveRight');
-                        direction = "right";
+                        divs[index].style.transition = `transform .3s ease-in`;
+                        divs[index].style.transform = `translateX(${tileWidth}px)`;
                     }
                 }
                 if (tileMoved) {
                     timerID = setTimeout(() => {
                         timerID = null;
-                        if (direction === "up") {
-                            divs[index].classList.toggle('moveUp');
-                        }
-                        if (direction === "down") {
-                            divs[index].classList.toggle('moveDown');
-                        }
-                        if (direction === "left") {
-                            divs[index].classList.toggle('moveLeft');
-                        }
-                        if (direction === "right") {
-                            divs[index].classList.toggle('moveRight');
-                        }
+                        divs[index].style.transition = ``;
+                        divs[index].style.transform = ``;
 
                         playerGrid.moveTile(nextRow, nextCol);
                         renderGrid();

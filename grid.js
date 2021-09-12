@@ -61,7 +61,6 @@ class Grid {
         const { grid } = this;
 
         const array = createArray(gridRows * gridCols);
-        let blankRow, blankCol;
         shuffleArray(array);
         if (!isSolvable(array)) {
             makeSolvable(array);
