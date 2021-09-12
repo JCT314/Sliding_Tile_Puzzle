@@ -17,11 +17,13 @@ let rows = 3;
 let cols = 3;
 
 const directionCodes = [up, down, left, right];
+let started = false;
 let timerID;
 const h1 = document.getElementById('win-message');
 const container = document.querySelector('#container');
 const resetButton = document.querySelector('button');
 const select = document.querySelector('select');
+const stopWatch = new StopWatch(document.querySelector('h3'));
 let playerGrid = new Grid(rows, cols);
 playerGrid.buildShuffledGrid();
 document.body.addEventListener("keyup", onKeyUp(playerGrid));
@@ -42,7 +44,9 @@ select.addEventListener('input', (e) => {
     renderGrid();
     document.removeEventListener("keyup", onKeyUp);
     document.body.addEventListener("keyup", onKeyUp(playerGrid));
-    select.returnV
+    started = false;
+    stopWatch.pause();
+    stopWatch.reset();
 });
 
 resetButton.addEventListener("click", () => {
@@ -53,6 +57,9 @@ resetButton.addEventListener("click", () => {
     document.body.removeEventListener("keyup", onKeyUp);
     document.body.addEventListener("keyup", onKeyUp(playerGrid));
     renderGrid();
+    started = false;
+    stopWatch.pause();
+    stopWatch.reset();
 });
 
 function setUpCSS() {
@@ -84,6 +91,10 @@ function onKeyUp() {
     return (e) => {
         tileWidth = container.querySelector('div').clientWidth;
         if (directionCodes.includes(e.keyCode)) {
+            if (!started) {
+                started = true;
+                stopWatch.start();
+            }
             let tileMoved = false;
             let index;
             let nextRow;
@@ -144,6 +155,7 @@ function onKeyUp() {
                         playerGrid.moveTile(nextRow, nextCol);
                         renderGrid();
                         if (playerGrid.isSolved()) {
+                            stopWatch.pause();
                             document.body.removeEventListener("keyup", onKeyUp);
                             h1.innerText = "You Win!";
                             container.classList.add('spin');
