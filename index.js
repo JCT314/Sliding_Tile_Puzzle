@@ -25,19 +25,17 @@ const resetButton = document.querySelector('button');
 const select = document.querySelector('select');
 const stopWatch = new StopWatch(document.querySelector('h3'));
 let playerGrid = new Grid(rows, cols);
+
 playerGrid.buildShuffledGrid();
 document.body.addEventListener("keyup", onKeyUp(playerGrid));
-
+document.body.addEventListener("click", onClick);
 setUpCSS();
 renderGrid();
 
 select.addEventListener('input', (e) => {
-    console.log(e);
     container.innerHTML = "";
     let value = e.target.value;
-    console.log(e.target.value);
     rows = cols = value;
-    console.log(rows, cols);
     playerGrid = new Grid(rows, cols);
     playerGrid.buildShuffledGrid();
     setUpCSS();
@@ -56,11 +54,14 @@ resetButton.addEventListener("click", () => {
     h1.innerText = "";
     document.body.removeEventListener("keyup", onKeyUp);
     document.body.addEventListener("keyup", onKeyUp(playerGrid));
+    document.body.removeEventListener("click", onClick);
+    document.body.addEventListener("click", onClick);
     renderGrid();
     started = false;
     stopWatch.pause();
     stopWatch.reset();
 });
+
 
 function setUpCSS() {
     container.style.gridTemplateColumns = `repeat(${playerGrid.gridRows},${100 / playerGrid.gridRows}%)`;
@@ -87,7 +88,84 @@ function getHtmlGrid(grid) {
     return htmlGrid;
 }
 
+function setDirectionValue(row, col) {
+    if (playerGrid.isDirectionValid(row, col)) {
+        return playerGrid.getGrid()[row][col];
+    } else {
+        return -1;
+    }
+}
+
+function onClick(e) {
+    if (!timerID) {
+        if (!started) {
+            started = true;
+            stopWatch.start();
+        }
+        const { currentRow, currentCol } = playerGrid;
+        tileWidth = container.querySelector('div').clientWidth;
+
+        let clickValue;
+        if (e.target.className === 'tile') {
+            clickValue = parseInt(e.target.innerText);
+            let upValue = setDirectionValue(currentRow - 1, currentCol);
+            let downValue = setDirectionValue(currentRow + 1, currentCol);
+            let leftValue = setDirectionValue(currentRow, currentCol - 1);
+            let rightValue = setDirectionValue(currentRow, currentCol + 1);
+            let values = [upValue, downValue, leftValue, rightValue];
+            let index = values.indexOf(clickValue);
+            let nextRow, nextCol;
+            if (index !== -1) {
+                if (index === 0) {
+                    e.target.style.transition = `transform .3s ease-in`;
+                    e.target.style.transform = `translateY(${tileWidth}px)`;
+                    nextRow = currentRow - 1;
+                    nextCol = currentCol;
+                }
+                if (index === 1) {
+                    e.target.style.transition = `transform .3s ease-in`;
+                    e.target.style.transform = `translateY(${-tileWidth}px)`;
+                    nextRow = currentRow + 1;
+                    nextCol = currentCol;
+                }
+                if (index === 2) {
+                    e.target.style.transition = `transform .3s ease-in`;
+                    e.target.style.transform = `translateX(${tileWidth}px)`;
+                    nextRow = currentRow;
+                    nextCol = currentCol - 1;
+                }
+                if (index === 3) {
+                    e.target.style.transition = `transform .3s ease-in`;
+                    e.target.style.transform = `translateX(${-tileWidth}px)`;
+                    nextRow = currentRow;
+                    nextCol = currentCol + 1;
+                }
+
+                timerID = setTimeout(() => {
+                    timerID = null;
+                    e.target.style.transition = ``;
+                    e.target.style.transform = ``;
+
+                    playerGrid.moveTile(nextRow, nextCol);
+                    renderGrid();
+                    if (playerGrid.isSolved()) {
+                        stopWatch.pause();
+                        document.body.removeEventListener("click", onClick);
+                        h1.innerText = "You Win!";
+                        container.classList.add('spin');
+                        setTimeout(() => {
+                            container.classList.remove('spin');
+                        }, 1000);
+                    }
+                }, 300);
+
+            }
+        }
+    }
+}
+
 function onKeyUp() {
+    // this will play a tile moving animation, move the tile in the correct position, render result to browser
     return (e) => {
         tileWidth = container.querySelector('div').clientWidth;
         if (directionCodes.includes(e.keyCode)) {
@@ -95,19 +173,18 @@ function onKeyUp() {
                 started = true;
                 stopWatch.start();
             }
-            let tileMoved = false;
+            let playTileAnimation = false;
             let index;
-            let nextRow;
-            let nextCol;
+            let nextRow, nextCol;
             if (!timerID) {
                 const divs = container.querySelectorAll('div');
                 let direction;
                 if (e.keyCode === up) {
                     nextRow = playerGrid.currentRow + 1;
                     nextCol = playerGrid.currentCol;
-                    tileMoved = playerGrid.isDirectionValid(nextRow, nextCol);
+                    playTileAnimation = playerGrid.isDirectionValid(nextRow, nextCol);
                     index = nextRow * playerGrid.gridRows + nextCol;
-                    if (tileMoved) {
+                    if (playTileAnimation) {
                         divs[index].style.transition = `transform .3s ease-in`;
                         divs[index].style.transform = `translateY(${-tileWidth}px)`;
                     }
@@ -116,9 +193,9 @@ function onKeyUp() {
                 if (e.keyCode === down) {
                     nextRow = playerGrid.currentRow - 1;
                     nextCol = playerGrid.currentCol;
-                    tileMoved = playerGrid.isDirectionValid(nextRow, nextCol);
+                    playTileAnimation = playerGrid.isDirectionValid(nextRow, nextCol);
                     index = nextRow * playerGrid.gridRows + nextCol;
-                    if (tileMoved) {
+                    if (playTileAnimation) {
                         divs[index].style.transition = `transform .3s ease-in`;
                         divs[index].style.transform = `translateY(${tileWidth}px)`;
 
@@ -128,9 +205,9 @@ function onKeyUp() {
                 if (e.keyCode === left) {
                     nextRow = playerGrid.currentRow;
                     nextCol = playerGrid.currentCol + 1;
-                    tileMoved = playerGrid.isDirectionValid(nextRow, nextCol);
+                    playTileAnimation = playerGrid.isDirectionValid(nextRow, nextCol);
                     index = nextRow * playerGrid.gridRows + nextCol;
-                    if (tileMoved) {
+                    if (playTileAnimation) {
                         divs[index].style.transition = `transform .3s ease-in`;
                         divs[index].style.transform = `translateX(${-tileWidth}px)`;
                     }
@@ -139,14 +216,14 @@ function onKeyUp() {
                 if (e.keyCode === right) {
                     nextRow = playerGrid.currentRow;
                     nextCol = playerGrid.currentCol - 1;
-                    tileMoved = playerGrid.isDirectionValid(playerGrid.currentRow, nextCol);
+                    playTileAnimation = playerGrid.isDirectionValid(playerGrid.currentRow, nextCol);
                     index = nextRow * playerGrid.gridRows + nextCol;
-                    if (tileMoved) {
+                    if (playTileAnimation) {
                         divs[index].style.transition = `transform .3s ease-in`;
                         divs[index].style.transform = `translateX(${tileWidth}px)`;
                     }
                 }
-                if (tileMoved) {
+                if (playTileAnimation) {
                     timerID = setTimeout(() => {
                         timerID = null;
                         divs[index].style.transition = ``;
