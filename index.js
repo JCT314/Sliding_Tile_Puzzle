@@ -71,7 +71,7 @@ function renderHighScores() {
 function onSubmitName(e) {
     let name = inputName.value;
     if (name.length === 0) {
-        name = "-";
+        name = "Anonymous";
     }
     if (playerGrid.gridRows === 3) {
         scoresMap.set(3, { name: name, score: getScore() });
@@ -213,7 +213,7 @@ function onClick(e) {
                         stopWatch.pause();
                         document.body.removeEventListener("click", onClick);
                         let currentScore = getScore();
-                        if (Object.keys(scoresMap.get(playerGrid.gridRows)).length === 0 || currentScore < scoresMap.get(playerGrid.gridRows)) {
+                        if (Object.keys(scoresMap.get(playerGrid.gridRows)).length === 0 || currentScore < scoresMap.get(playerGrid.gridRows)['score']) {
                             h1.innerText = "New High Score!";
                             newHighScoreForm.classList.toggle('hide');
                             resetButton.classList.toggle('hide');
@@ -305,7 +305,7 @@ function onKeyUp(e) {
                         stopWatch.pause();
                         document.body.removeEventListener("keyup", onKeyUp);
                         let currentScore = getScore();
-                        if (Object.keys(scoresMap.get(playerGrid.gridRows)).length === 0 || currentScore < scoresMap.get(playerGrid.gridRows)) {
+                        if (Object.keys(scoresMap.get(playerGrid.gridRows)).length === 0 || currentScore < scoresMap.get(playerGrid.gridRows)['score']) {
                             h1.innerText = "New High Score!";
                             newHighScoreForm.classList.toggle('hide');
                             resetButton.classList.toggle('hide');
