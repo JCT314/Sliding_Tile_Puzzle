@@ -13,6 +13,7 @@ const down = 83;
 const left = 65;
 const right = 68;
 let tileWidth;
+let tileHeight;
 let rows = 3;
 let cols = 3;
 
@@ -98,15 +99,16 @@ function setDirectionValue(row, col) {
 
 function onClick(e) {
     if (!timerID) {
-        if (!started) {
-            started = true;
-            stopWatch.start();
-        }
         const { currentRow, currentCol } = playerGrid;
         tileWidth = container.querySelector('div').clientWidth;
+        tileHeight = container.querySelector('div').clientHeight;
 
         let clickValue;
         if (e.target.className === 'tile') {
+            if (!started) {
+                started = true;
+                stopWatch.start();
+            }
             clickValue = parseInt(e.target.innerText);
             let upValue = setDirectionValue(currentRow - 1, currentCol);
             let downValue = setDirectionValue(currentRow + 1, currentCol);
@@ -118,13 +120,13 @@ function onClick(e) {
             if (index !== -1) {
                 if (index === 0) {
                     e.target.style.transition = `transform .3s ease-in`;
-                    e.target.style.transform = `translateY(${tileWidth}px)`;
+                    e.target.style.transform = `translateY(${tileHeight}px)`;
                     nextRow = currentRow - 1;
                     nextCol = currentCol;
                 }
                 if (index === 1) {
                     e.target.style.transition = `transform .3s ease-in`;
-                    e.target.style.transform = `translateY(${-tileWidth}px)`;
+                    e.target.style.transform = `translateY(${-tileHeight}px)`;
                     nextRow = currentRow + 1;
                     nextCol = currentCol;
                 }
@@ -153,6 +155,7 @@ function onClick(e) {
                         document.body.removeEventListener("click", onClick);
                         h1.innerText = "You Win!";
                         container.classList.add('spin');
+                        console.log(getScore());
                         setTimeout(() => {
                             container.classList.remove('spin');
                         }, 1000);
@@ -168,6 +171,7 @@ function onKeyUp() {
     // this will play a tile moving animation, move the tile in the correct position, render result to browser
     return (e) => {
         tileWidth = container.querySelector('div').clientWidth;
+        tileHeight = container.querySelector('div').clientHeight;
         if (directionCodes.includes(e.keyCode)) {
             if (!started) {
                 started = true;
@@ -186,7 +190,7 @@ function onKeyUp() {
                     index = nextRow * playerGrid.gridRows + nextCol;
                     if (playTileAnimation) {
                         divs[index].style.transition = `transform .3s ease-in`;
-                        divs[index].style.transform = `translateY(${-tileWidth}px)`;
+                        divs[index].style.transform = `translateY(${-tileHeight}px)`;
                     }
                 }
 
@@ -197,7 +201,7 @@ function onKeyUp() {
                     index = nextRow * playerGrid.gridRows + nextCol;
                     if (playTileAnimation) {
                         divs[index].style.transition = `transform .3s ease-in`;
-                        divs[index].style.transform = `translateY(${tileWidth}px)`;
+                        divs[index].style.transform = `translateY(${tileHeight}px)`;
 
                     }
                 }
@@ -236,6 +240,7 @@ function onKeyUp() {
                             document.body.removeEventListener("keyup", onKeyUp);
                             h1.innerText = "You Win!";
                             container.classList.add('spin');
+                            console.log(getScore());
                             setTimeout(() => {
                                 container.classList.remove('spin');
                             }, 1000);
@@ -245,6 +250,13 @@ function onKeyUp() {
             }
         }
     }
+}
+
+function getScore() {
+    let time = stopWatch.toTime();
+    let values = time.split(":");
+    let score = values[0] * 100 + values[1];
+    return score;
 }
 
 
