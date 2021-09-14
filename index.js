@@ -12,6 +12,11 @@ const up = 87;
 const down = 83;
 const left = 65;
 const right = 68;
+const scoresMap = new Map();
+scoresMap.set(3, {});
+scoresMap.set(5, {});
+scoresMap.set(7, {});
+
 let tileWidth;
 let tileHeight;
 let rows = 3;
@@ -22,18 +27,72 @@ let started = false;
 let timerID;
 const h1 = document.getElementById('win-message');
 const container = document.querySelector('#container');
-const resetButton = document.querySelector('button');
+const resetButton = document.querySelector('#buttons button');
+const submitButton = document.querySelector('#new-highscore button');
+const newHighScoreForm = document.querySelector('#new-highscore');
 const select = document.querySelector('select');
+const inputName = document.querySelector('input');
+const scores = document.querySelector('#scores');
 const stopWatch = new StopWatch(document.querySelector('h3'));
 let playerGrid = new Grid(rows, cols);
 
 playerGrid.buildShuffledGrid();
-document.body.addEventListener("keyup", onKeyUp(playerGrid));
+document.body.addEventListener("keyup", onKeyUp);
 document.body.addEventListener("click", onClick);
+submitButton.addEventListener("click", onSubmitName);
 setUpCSS();
 renderGrid();
+renderHighScores();
+
+function renderHighScores() {
+    scores.innerHTML = `
+    <h2>High Scores</h2>
+    <hr>`;
+    if (Object.keys(scoresMap.get(3)).length !== 0) {
+        scores.innerHTML += `
+        <h3>3 x 3</h3>
+        <h4>${scoresMap.get(3)['name']} - ${stopWatch.toTime()}</h4 >
+        <hr>`;
+    }
+    if (Object.keys(scoresMap.get(5)).length !== 0) {
+        scores.innerHTML += `
+        <h3>5 x 5</h3>
+        <h4>${scoresMap.get(5)['name']} - ${stopWatch.toTime()}</h4 >
+        <hr>`;
+    }
+    if (Object.keys(scoresMap.get(7)).length !== 0) {
+        scores.innerHTML += `
+        <h3>7 x 7</h3>
+        <h4>${scoresMap.get(7)['name']} - ${stopWatch.toTime()}</h4 >
+        `;
+    }
+}
+
+function onSubmitName(e) {
+    let name = inputName.value;
+    if (name.length === 0) {
+        name = "-";
+    }
+    if (playerGrid.gridRows === 3) {
+        scoresMap.set(3, { name: name, score: getScore() });
+    }
+
+    if (playerGrid.gridRows === 5) {
+        scoresMap.set(5, { name: name, score: getScore() });
+    }
+
+    if (playerGrid.gridRows === 7) {
+        scoresMap.set(7, { name: name, score: getScore() });
+    }
+    newHighScoreForm.classList.toggle('hide');
+    resetButton.classList.toggle('hide');
+    select.classList.toggle('hide');
+    h1.innerText = "";
+    renderHighScores();
+}
 
 select.addEventListener('input', (e) => {
+    h1.innerText = "";
     container.innerHTML = "";
     let value = e.target.value;
     rows = cols = value;
@@ -41,8 +100,8 @@ select.addEventListener('input', (e) => {
     playerGrid.buildShuffledGrid();
     setUpCSS();
     renderGrid();
-    document.removeEventListener("keyup", onKeyUp);
-    document.body.addEventListener("keyup", onKeyUp(playerGrid));
+    document.body.removeEventListener("keyup", onKeyUp);
+    document.body.addEventListener("keyup", onKeyUp);
     started = false;
     stopWatch.pause();
     stopWatch.reset();
@@ -54,7 +113,7 @@ resetButton.addEventListener("click", () => {
     playerGrid.buildShuffledGrid();
     h1.innerText = "";
     document.body.removeEventListener("keyup", onKeyUp);
-    document.body.addEventListener("keyup", onKeyUp(playerGrid));
+    document.body.addEventListener("keyup", onKeyUp);
     document.body.removeEventListener("click", onClick);
     document.body.addEventListener("click", onClick);
     renderGrid();
@@ -153,9 +212,18 @@ function onClick(e) {
                     if (playerGrid.isSolved()) {
                         stopWatch.pause();
                         document.body.removeEventListener("click", onClick);
-                        h1.innerText = "You Win!";
+                        let currentScore = getScore();
+                        if (Object.keys(scoresMap.get(playerGrid.gridRows)).length === 0 || currentScore < scoresMap.get(playerGrid.gridRows)) {
+                            h1.innerText = "New High Score!";
+                            newHighScoreForm.classList.toggle('hide');
+                            resetButton.classList.toggle('hide');
+                            select.classList.toggle('hide');
+                        } else {
+                            h1.innerText = "Did not beat high score :(";
+                        }
+                        document.body.removeEventListener("keyup", onKeyUp);
+                        document.body.removeEventListener("click", onClick);
                         container.classList.add('spin');
-                        console.log(getScore());
                         setTimeout(() => {
                             container.classList.remove('spin');
                         }, 1000);
@@ -167,86 +235,92 @@ function onClick(e) {
     }
 }
 
-function onKeyUp() {
-    // this will play a tile moving animation, move the tile in the correct position, render result to browser
-    return (e) => {
-        tileWidth = container.querySelector('div').clientWidth;
-        tileHeight = container.querySelector('div').clientHeight;
-        if (directionCodes.includes(e.keyCode)) {
-            if (!started) {
-                started = true;
-                stopWatch.start();
-            }
-            let playTileAnimation = false;
-            let index;
-            let nextRow, nextCol;
-            if (!timerID) {
-                const divs = container.querySelectorAll('div');
-                let direction;
-                if (e.keyCode === up) {
-                    nextRow = playerGrid.currentRow + 1;
-                    nextCol = playerGrid.currentCol;
-                    playTileAnimation = playerGrid.isDirectionValid(nextRow, nextCol);
-                    index = nextRow * playerGrid.gridRows + nextCol;
-                    if (playTileAnimation) {
-                        divs[index].style.transition = `transform .3s ease-in`;
-                        divs[index].style.transform = `translateY(${-tileHeight}px)`;
-                    }
-                }
-
-                if (e.keyCode === down) {
-                    nextRow = playerGrid.currentRow - 1;
-                    nextCol = playerGrid.currentCol;
-                    playTileAnimation = playerGrid.isDirectionValid(nextRow, nextCol);
-                    index = nextRow * playerGrid.gridRows + nextCol;
-                    if (playTileAnimation) {
-                        divs[index].style.transition = `transform .3s ease-in`;
-                        divs[index].style.transform = `translateY(${tileHeight}px)`;
-
-                    }
-                }
-
-                if (e.keyCode === left) {
-                    nextRow = playerGrid.currentRow;
-                    nextCol = playerGrid.currentCol + 1;
-                    playTileAnimation = playerGrid.isDirectionValid(nextRow, nextCol);
-                    index = nextRow * playerGrid.gridRows + nextCol;
-                    if (playTileAnimation) {
-                        divs[index].style.transition = `transform .3s ease-in`;
-                        divs[index].style.transform = `translateX(${-tileWidth}px)`;
-                    }
-                }
-
-                if (e.keyCode === right) {
-                    nextRow = playerGrid.currentRow;
-                    nextCol = playerGrid.currentCol - 1;
-                    playTileAnimation = playerGrid.isDirectionValid(playerGrid.currentRow, nextCol);
-                    index = nextRow * playerGrid.gridRows + nextCol;
-                    if (playTileAnimation) {
-                        divs[index].style.transition = `transform .3s ease-in`;
-                        divs[index].style.transform = `translateX(${tileWidth}px)`;
-                    }
-                }
+function onKeyUp(e) {
+    tileWidth = container.querySelector('div').clientWidth;
+    tileHeight = container.querySelector('div').clientHeight;
+    if (directionCodes.includes(e.keyCode)) {
+        if (!started) {
+            started = true;
+            stopWatch.start();
+        }
+        let playTileAnimation = false;
+        let index;
+        let nextRow, nextCol;
+        if (!timerID) {
+            const divs = container.querySelectorAll('div');
+            let direction;
+            if (e.keyCode === up) {
+                nextRow = playerGrid.currentRow + 1;
+                nextCol = playerGrid.currentCol;
+                playTileAnimation = playerGrid.isDirectionValid(nextRow, nextCol);
+                index = nextRow * playerGrid.gridRows + nextCol;
                 if (playTileAnimation) {
-                    timerID = setTimeout(() => {
-                        timerID = null;
-                        divs[index].style.transition = ``;
-                        divs[index].style.transform = ``;
-
-                        playerGrid.moveTile(nextRow, nextCol);
-                        renderGrid();
-                        if (playerGrid.isSolved()) {
-                            stopWatch.pause();
-                            document.body.removeEventListener("keyup", onKeyUp);
-                            h1.innerText = "You Win!";
-                            container.classList.add('spin');
-                            console.log(getScore());
-                            setTimeout(() => {
-                                container.classList.remove('spin');
-                            }, 1000);
-                        }
-                    }, 300);
+                    divs[index].style.transition = `transform .3s ease-in`;
+                    divs[index].style.transform = `translateY(${-tileHeight}px)`;
                 }
+            }
+
+            if (e.keyCode === down) {
+                nextRow = playerGrid.currentRow - 1;
+                nextCol = playerGrid.currentCol;
+                playTileAnimation = playerGrid.isDirectionValid(nextRow, nextCol);
+                index = nextRow * playerGrid.gridRows + nextCol;
+                if (playTileAnimation) {
+                    divs[index].style.transition = `transform .3s ease-in`;
+                    divs[index].style.transform = `translateY(${tileHeight}px)`;
+
+                }
+            }
+
+            if (e.keyCode === left) {
+                nextRow = playerGrid.currentRow;
+                nextCol = playerGrid.currentCol + 1;
+                playTileAnimation = playerGrid.isDirectionValid(nextRow, nextCol);
+                index = nextRow * playerGrid.gridRows + nextCol;
+                if (playTileAnimation) {
+                    divs[index].style.transition = `transform .3s ease-in`;
+                    divs[index].style.transform = `translateX(${-tileWidth}px)`;
+                }
+            }
+
+            if (e.keyCode === right) {
+                nextRow = playerGrid.currentRow;
+                nextCol = playerGrid.currentCol - 1;
+                playTileAnimation = playerGrid.isDirectionValid(playerGrid.currentRow, nextCol);
+                index = nextRow * playerGrid.gridRows + nextCol;
+                if (playTileAnimation) {
+                    divs[index].style.transition = `transform .3s ease-in`;
+                    divs[index].style.transform = `translateX(${tileWidth}px)`;
+                }
+            }
+            if (playTileAnimation) {
+                timerID = setTimeout(() => {
+                    timerID = null;
+                    divs[index].style.transition = ``;
+                    divs[index].style.transform = ``;
+
+                    playerGrid.moveTile(nextRow, nextCol);
+                    renderGrid();
+                    if (playerGrid.isSolved()) {
+                        stopWatch.pause();
+                        document.body.removeEventListener("keyup", onKeyUp);
+                        let currentScore = getScore();
+                        if (Object.keys(scoresMap.get(playerGrid.gridRows)).length === 0 || currentScore < scoresMap.get(playerGrid.gridRows)) {
+                            h1.innerText = "New High Score!";
+                            newHighScoreForm.classList.toggle('hide');
+                            resetButton.classList.toggle('hide');
+                            select.classList.toggle('hide');
+                        } else {
+                            h1.innerText = "Did not beat high score :(";
+                        }
+                        document.body.removeEventListener("keyup", onKeyUp);
+                        document.body.removeEventListener("click", onClick);
+                        container.classList.add('spin');
+                        setTimeout(() => {
+                            container.classList.remove('spin');
+                        }, 1000);
+                    }
+                }, 300);
             }
         }
     }
@@ -255,10 +329,7 @@ function onKeyUp() {
 function getScore() {
     let time = stopWatch.toTime();
     let values = time.split(":");
-    let score = values[0] * 100 + values[1];
+    let score = parseInt(values[0] * 100) + parseInt(values[1]);
     return score;
 }
 
-
-// want to implement yates shuffling algo
-// check inversions

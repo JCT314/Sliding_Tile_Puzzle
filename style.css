@@ -7,12 +7,43 @@ body {
 
 main {
     display: flex;
-    justify-content: space-between;
+    /* justify-content: flex-end; */
 
 }
 
 h4 {
     margin: 10px 0px;
+}
+
+#new-highscore {
+    display:flex;
+    align-items: center;
+    justify-content: flex-start;
+    border: 10px black solid;
+    margin-left: 10px;
+    margin-right: 10px;
+    margin-bottom: 10px;
+}
+
+#new-highscore button {
+    height: 50px;
+    margin-left: 50px;
+    margin-right: 50px;
+    background-color: darkgreen;
+    color: white;
+    border: 10px black double;
+    font-size: 75%;
+    width: 125px;
+}
+
+#new-highscore input {
+    margin-left: 50px;
+    height: 30px;
+    background-color:rgb(74, 221, 37);
+}
+
+#new-highscore h3 {
+    margin-left: 10px;
 }
 
 #scores {
@@ -45,7 +76,6 @@ select {
     margin-left: 40vw;
     height: 30px;
     width: 75px;
-    
     background-color:rgb(74, 221, 37);
 }
 
@@ -53,7 +83,6 @@ select {
     padding: 20px 10px 10px 10px;
     display: inline-block;
     margin-left: 1vw;
-    /* background-color:rgb(74, 221, 37); */
     margin-top: 0px;
 }
 
@@ -75,7 +104,9 @@ select {
     background-color: rgb(74, 221, 37);
     text-align: center;
     border: .5px black solid;
-    font-size: 150%;
+    font-size: 200%;
+    display: grid;
+    align-content: center;
 }
 
 .moveRight {
@@ -119,7 +150,7 @@ h1 {
     text-align: center;
 }
 
-button {
+#buttons button {
     padding: 10px 50px;
     background-color: darkgreen;
     color: white;
@@ -133,3 +164,4 @@ button:hover {
 button:active {
     background-color: darkgreen;
 }
+
