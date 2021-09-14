@@ -94,7 +94,7 @@ function onSubmitName(e) {
 select.addEventListener('input', (e) => {
     h1.innerText = "";
     container.innerHTML = "";
-    let value = e.target.value;
+    let value = parseInt(e.target.value);
     rows = cols = value;
     playerGrid = new Grid(rows, cols);
     playerGrid.buildShuffledGrid();

@@ -34,7 +34,7 @@ class StopWatch {
     }
 
     getTime() {
-        return `Time: ${this.toTime()}`
+        return `${this.toTime()}`
     }
 
     toTime() {
