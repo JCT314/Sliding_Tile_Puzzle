@@ -1,28 +1,22 @@
-/*
-    3) look up algorithm to shuffle tiles * need to adjust algorithm
-
-    Eventually
-    1) let a user set a grid size
-    2) choose an image
-    3) maybe add a timing feature
-        a) once you beat it, get a url that you can send to your friends so they get the same set up
-        and can compete with them
-*/
-const up = 87;
-const down = 83;
-const left = 65;
-const right = 68;
+const upCode = 87;
+const downCode = 83;
+const leftCode = 65;
+const rightCode = 68;
+const smallestGridLength = 3;
+const mediumGridLength = 5;
+const largesttGridLength = 7;
+const delay = 200;
 const scoresMap = new Map();
-scoresMap.set(3, {});
-scoresMap.set(5, {});
-scoresMap.set(7, {});
+scoresMap.set(smallestGridLength, {});
+scoresMap.set(mediumGridLength, {});
+scoresMap.set(largesttGridLength, {});
 
 let tileWidth;
 let tileHeight;
-let rows = 3;
-let cols = 3;
+let rows = smallestGridLength;
+let cols = smallestGridLength;
 
-const directionCodes = [up, down, left, right];
+const directionCodes = [upCode, downCode, leftCode, rightCode];
 let started = false;
 let timerID;
 const h1 = document.getElementById('win-message');
@@ -37,34 +31,34 @@ const stopWatch = new StopWatch(document.querySelector('h3'));
 let playerGrid = new Grid(rows, cols);
 
 playerGrid.buildShuffledGrid();
-document.body.addEventListener("keyup", onKeyUp);
+document.body.addEventListener("keyup", onKeyupCode);
 document.body.addEventListener("click", onClick);
 submitButton.addEventListener("click", onSubmitName);
-setUpCSS();
+setupCodeCSS();
 renderGrid();
 renderHighScores();
+
+function getHtmlHighScore(gridLength) {
+    if (Object.keys(scoresMap.get(gridLength)).length !== 0) {
+        scores.innerHTML += `
+        <h3>${gridLength} x ${gridLength}</h3>
+        <h4>${scoresMap.get(gridLength)['name']} - ${stopWatch.toTime()}</h4 >
+        <hr>`;
+    }
+}
 
 function renderHighScores() {
     scores.innerHTML = `
     <h2>High Scores</h2>
     <hr>`;
-    if (Object.keys(scoresMap.get(3)).length !== 0) {
-        scores.innerHTML += `
-        <h3>3 x 3</h3>
-        <h4>${scoresMap.get(3)['name']} - ${stopWatch.toTime()}</h4 >
-        <hr>`;
-    }
-    if (Object.keys(scoresMap.get(5)).length !== 0) {
-        scores.innerHTML += `
-        <h3>5 x 5</h3>
-        <h4>${scoresMap.get(5)['name']} - ${stopWatch.toTime()}</h4 >
-        <hr>`;
-    }
-    if (Object.keys(scoresMap.get(7)).length !== 0) {
-        scores.innerHTML += `
-        <h3>7 x 7</h3>
-        <h4>${scoresMap.get(7)['name']} - ${stopWatch.toTime()}</h4 >
-        `;
+    getHtmlHighScore(smallestGridLength);
+    getHtmlHighScore(mediumGridLength);
+    getHtmlHighScore(largesttGridLength);
+}
+
+function saveHighScore(gridLength, name) {
+    if (playerGrid.gridRows === gridLength) {
+        scoresMap.set(gridLength, { name: name, score: getScore() });
     }
 }
 
@@ -73,17 +67,10 @@ function onSubmitName(e) {
     if (name.length === 0) {
         name = "Anonymous";
     }
-    if (playerGrid.gridRows === 3) {
-        scoresMap.set(3, { name: name, score: getScore() });
-    }
+    saveHighScore(smallestGridLength, name);
+    saveHighScore(mediumGridLength, name);
+    saveHighScore(largesttGridLength, name);
 
-    if (playerGrid.gridRows === 5) {
-        scoresMap.set(5, { name: name, score: getScore() });
-    }
-
-    if (playerGrid.gridRows === 7) {
-        scoresMap.set(7, { name: name, score: getScore() });
-    }
     newHighScoreForm.classList.toggle('hide');
     resetButton.classList.toggle('hide');
     select.classList.toggle('hide');
@@ -98,10 +85,10 @@ select.addEventListener('input', (e) => {
     rows = cols = value;
     playerGrid = new Grid(rows, cols);
     playerGrid.buildShuffledGrid();
-    setUpCSS();
+    setupCodeCSS();
     renderGrid();
-    document.body.removeEventListener("keyup", onKeyUp);
-    document.body.addEventListener("keyup", onKeyUp);
+    document.body.removeEventListener("keyup", onKeyupCode);
+    document.body.addEventListener("keyup", onKeyupCode);
     started = false;
     stopWatch.pause();
     stopWatch.reset();
@@ -112,8 +99,8 @@ resetButton.addEventListener("click", () => {
     playerGrid = new Grid(rows, cols);
     playerGrid.buildShuffledGrid();
     h1.innerText = "";
-    document.body.removeEventListener("keyup", onKeyUp);
-    document.body.addEventListener("keyup", onKeyUp);
+    document.body.removeEventListener("keyup", onKeyupCode);
+    document.body.addEventListener("keyup", onKeyupCode);
     document.body.removeEventListener("click", onClick);
     document.body.addEventListener("click", onClick);
     renderGrid();
@@ -123,7 +110,7 @@ resetButton.addEventListener("click", () => {
 });
 
 
-function setUpCSS() {
+function setupCodeCSS() {
     container.style.gridTemplateColumns = `repeat(${playerGrid.gridRows},${100 / playerGrid.gridRows}%)`;
 }
 
@@ -156,6 +143,15 @@ function setDirectionValue(row, col) {
     }
 }
 
+function startSlidingAnimation(htmlElement, isMovingVertical, distance) {
+    htmlElement.style.transition = `transform .2s ease-in`;
+    if (isMovingVertical) {
+        htmlElement.style.transform = `translateY(${distance}px)`;
+    } else {
+        htmlElement.style.transform = `translateX(${distance}px)`;
+    }
+}
+
 function onClick(e) {
     if (!timerID) {
         const { currentRow, currentCol } = playerGrid;
@@ -169,35 +165,31 @@ function onClick(e) {
                 stopWatch.start();
             }
             clickValue = parseInt(e.target.innerText);
-            let upValue = setDirectionValue(currentRow - 1, currentCol);
-            let downValue = setDirectionValue(currentRow + 1, currentCol);
-            let leftValue = setDirectionValue(currentRow, currentCol - 1);
-            let rightValue = setDirectionValue(currentRow, currentCol + 1);
-            let values = [upValue, downValue, leftValue, rightValue];
+            let up = setDirectionValue(currentRow - 1, currentCol);
+            let down = setDirectionValue(currentRow + 1, currentCol);
+            let left = setDirectionValue(currentRow, currentCol - 1);
+            let right = setDirectionValue(currentRow, currentCol + 1);
+            let values = [up, down, left, right];
             let index = values.indexOf(clickValue);
             let nextRow, nextCol;
             if (index !== -1) {
                 if (index === 0) {
-                    e.target.style.transition = `transform .3s ease-in`;
-                    e.target.style.transform = `translateY(${tileHeight}px)`;
+                    startSlidingAnimation(e.target, true, tileHeight);
                     nextRow = currentRow - 1;
                     nextCol = currentCol;
                 }
                 if (index === 1) {
-                    e.target.style.transition = `transform .3s ease-in`;
-                    e.target.style.transform = `translateY(${-tileHeight}px)`;
+                    startSlidingAnimation(e.target, true, -tileHeight);
                     nextRow = currentRow + 1;
                     nextCol = currentCol;
                 }
                 if (index === 2) {
-                    e.target.style.transition = `transform .3s ease-in`;
-                    e.target.style.transform = `translateX(${tileWidth}px)`;
+                    startSlidingAnimation(e.target, false, tileWidth);
                     nextRow = currentRow;
                     nextCol = currentCol - 1;
                 }
                 if (index === 3) {
-                    e.target.style.transition = `transform .3s ease-in`;
-                    e.target.style.transform = `translateX(${-tileWidth}px)`;
+                    startSlidingAnimation(e.target, false, -tileWidth);
                     nextRow = currentRow;
                     nextCol = currentCol + 1;
                 }
@@ -221,21 +213,21 @@ function onClick(e) {
                         } else {
                             h1.innerText = "Did not beat high score :(";
                         }
-                        document.body.removeEventListener("keyup", onKeyUp);
+                        document.body.removeEventListener("keyup", onKeyupCode);
                         document.body.removeEventListener("click", onClick);
                         container.classList.add('spin');
                         setTimeout(() => {
                             container.classList.remove('spin');
                         }, 1000);
                     }
-                }, 300);
+                }, delay);
 
             }
         }
     }
 }
 
-function onKeyUp(e) {
+function onKeyupCode(e) {
     tileWidth = container.querySelector('div').clientWidth;
     tileHeight = container.querySelector('div').clientHeight;
     if (directionCodes.includes(e.keyCode)) {
@@ -245,65 +237,60 @@ function onKeyUp(e) {
         }
         let playTileAnimation = false;
         let index;
-        let nextRow, nextCol;
+        let nextRow, nextCol, tile;
         if (!timerID) {
             const divs = container.querySelectorAll('div');
             let direction;
-            if (e.keyCode === up) {
+            if (e.keyCode === upCode) {
                 nextRow = playerGrid.currentRow + 1;
                 nextCol = playerGrid.currentCol;
-                playTileAnimation = playerGrid.isDirectionValid(nextRow, nextCol);
-                index = nextRow * playerGrid.gridRows + nextCol;
-                if (playTileAnimation) {
-                    divs[index].style.transition = `transform .3s ease-in`;
-                    divs[index].style.transform = `translateY(${-tileHeight}px)`;
+                tile = getTileElement(divs, nextRow, nextCol);
+                if (tile !== null) {
+                    playTileAnimation = true;
+                    startSlidingAnimation(tile, true, -tileHeight);
                 }
             }
 
-            if (e.keyCode === down) {
+            if (e.keyCode === downCode) {
                 nextRow = playerGrid.currentRow - 1;
                 nextCol = playerGrid.currentCol;
-                playTileAnimation = playerGrid.isDirectionValid(nextRow, nextCol);
-                index = nextRow * playerGrid.gridRows + nextCol;
-                if (playTileAnimation) {
-                    divs[index].style.transition = `transform .3s ease-in`;
-                    divs[index].style.transform = `translateY(${tileHeight}px)`;
-
+                tile = getTileElement(divs, nextRow, nextCol);
+                if (tile !== null) {
+                    playTileAnimation = true;
+                    startSlidingAnimation(tile, true, tileHeight);
                 }
             }
 
-            if (e.keyCode === left) {
+            if (e.keyCode === leftCode) {
                 nextRow = playerGrid.currentRow;
                 nextCol = playerGrid.currentCol + 1;
-                playTileAnimation = playerGrid.isDirectionValid(nextRow, nextCol);
-                index = nextRow * playerGrid.gridRows + nextCol;
-                if (playTileAnimation) {
-                    divs[index].style.transition = `transform .3s ease-in`;
-                    divs[index].style.transform = `translateX(${-tileWidth}px)`;
+                tile = getTileElement(divs, nextRow, nextCol);
+                if (tile !== null) {
+                    playTileAnimation = true;
+                    startSlidingAnimation(tile, false, -tileWidth);
                 }
             }
 
-            if (e.keyCode === right) {
+            if (e.keyCode === rightCode) {
                 nextRow = playerGrid.currentRow;
                 nextCol = playerGrid.currentCol - 1;
-                playTileAnimation = playerGrid.isDirectionValid(playerGrid.currentRow, nextCol);
-                index = nextRow * playerGrid.gridRows + nextCol;
-                if (playTileAnimation) {
-                    divs[index].style.transition = `transform .3s ease-in`;
-                    divs[index].style.transform = `translateX(${tileWidth}px)`;
+                tile = getTileElement(divs, nextRow, nextCol);
+                if (tile !== null) {
+                    playTileAnimation = true;
+                    startSlidingAnimation(tile, false, tileWidth);
                 }
             }
             if (playTileAnimation) {
                 timerID = setTimeout(() => {
                     timerID = null;
-                    divs[index].style.transition = ``;
-                    divs[index].style.transform = ``;
+                    tile.style.transition = ``;
+                    tile.style.transition = ``;
 
                     playerGrid.moveTile(nextRow, nextCol);
                     renderGrid();
                     if (playerGrid.isSolved()) {
                         stopWatch.pause();
-                        document.body.removeEventListener("keyup", onKeyUp);
+                        document.body.removeEventListener("keyup", onKeyupCode);
                         let currentScore = getScore();
                         if (Object.keys(scoresMap.get(playerGrid.gridRows)).length === 0 || currentScore < scoresMap.get(playerGrid.gridRows)['score']) {
                             h1.innerText = "New High Score!";
@@ -313,17 +300,26 @@ function onKeyUp(e) {
                         } else {
                             h1.innerText = "Did not beat high score :(";
                         }
-                        document.body.removeEventListener("keyup", onKeyUp);
+                        document.body.removeEventListener("keyup", onKeyupCode);
                         document.body.removeEventListener("click", onClick);
                         container.classList.add('spin');
                         setTimeout(() => {
                             container.classList.remove('spin');
                         }, 1000);
                     }
-                }, 300);
+                }, delay);
             }
         }
     }
+}
+
+function getTileElement(divs, row, col) {
+    isValid = playerGrid.isDirectionValid(row, col);
+    index = row * playerGrid.gridRows + col;
+    if (isValid) {
+        return divs[index];
+    }
+    return null;
 }
 
 function getScore() {
