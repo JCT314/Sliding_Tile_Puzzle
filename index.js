@@ -4,12 +4,12 @@ const leftCode = 65;
 const rightCode = 68;
 const smallestGridLength = 3;
 const mediumGridLength = 5;
-const largesttGridLength = 7;
+const largestGridLength = 7;
 const delay = 200;
 const scoresMap = new Map();
 scoresMap.set(smallestGridLength, {});
 scoresMap.set(mediumGridLength, {});
-scoresMap.set(largesttGridLength, {});
+scoresMap.set(largestGridLength, {});
 
 let tileWidth;
 let tileHeight;
@@ -42,7 +42,7 @@ function getHtmlHighScore(gridLength) {
     if (Object.keys(scoresMap.get(gridLength)).length !== 0) {
         scores.innerHTML += `
         <h3>${gridLength} x ${gridLength}</h3>
-        <h4>${scoresMap.get(gridLength)['name']} - ${stopWatch.toTime()}</h4 >
+        <h4>${scoresMap.get(gridLength)['name']} - ${stopWatch.parseTime(scoresMap.get(gridLength)['score'])}</h4 >
         <hr>`;
     }
 }
@@ -53,13 +53,11 @@ function renderHighScores() {
     <hr>`;
     getHtmlHighScore(smallestGridLength);
     getHtmlHighScore(mediumGridLength);
-    getHtmlHighScore(largesttGridLength);
+    getHtmlHighScore(largestGridLength);
 }
 
 function saveHighScore(gridLength, name) {
-    if (playerGrid.gridRows === gridLength) {
-        scoresMap.set(gridLength, { name: name, score: getScore() });
-    }
+    scoresMap.set(gridLength, { name: name, score: getScore() });
 }
 
 function onSubmitName(e) {
@@ -67,9 +65,15 @@ function onSubmitName(e) {
     if (name.length === 0) {
         name = "Anonymous";
     }
-    saveHighScore(smallestGridLength, name);
-    saveHighScore(mediumGridLength, name);
-    saveHighScore(largesttGridLength, name);
+    if (playerGrid.gridRows === smallestGridLength) {
+        saveHighScore(smallestGridLength, name);
+    }
+    if (playerGrid.gridRows === mediumGridLength) {
+        saveHighScore(mediumGridLength, name);
+    }
+    if (playerGrid.gridRows === largestGridLength) {
+        saveHighScore(largestGridLength, name);
+    }
 
     newHighScoreForm.classList.toggle('hide');
     resetButton.classList.toggle('hide');
@@ -328,4 +332,6 @@ function getScore() {
     let score = parseInt(values[0] * 100) + parseInt(values[1]);
     return score;
 }
+
+console.log('s');
 

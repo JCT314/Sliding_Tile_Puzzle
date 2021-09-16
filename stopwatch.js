@@ -42,4 +42,10 @@ class StopWatch {
         const seconds = (this.timeLeft % 60).toFixed(0);
         return `${minutes}:${seconds < 10 ? `0${seconds}` : seconds}`;
     }
+
+    parseTime(value) {
+        const minutes = parseInt(value / 60);
+        const seconds = (value % 60).toFixed(0);
+        return `${minutes}:${seconds < 10 ? `0${seconds}` : seconds}`;
+    }
 }
