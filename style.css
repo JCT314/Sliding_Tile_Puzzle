@@ -1,5 +1,22 @@
+:root {
+    --primary-color: #086eac;
+    --secondary-color: #08bbff;
+    --tertiary-color: #08bbff;
+    /* --tertiary-color: #0f2a47; */
+    --container-color: #08bbff;
+    /* --container-color: #0efff9; */
+    --tile-color: #0efff9;
+    --secondary-darker-color: #082eaf;
+}
+
+.color1 {color: #140f07;}
+.color2 {color: #0f2a47;}
+.color3 {color: #086eac;}
+.color4 {color: #08bbff;}
+.color5 {color: #0efff9;}
+
 body {
-    background-color: rgb(146, 250, 114);
+    background-color: var(--primary-color);
     height: 80vh;
     width: 100vw;
     margin: 0px;
@@ -7,8 +24,6 @@ body {
 
 main {
     display: flex;
-    /* justify-content: flex-end; */
-
 }
 
 h4 {
@@ -29,17 +44,26 @@ h4 {
     height: 50px;
     margin-left: 50px;
     margin-right: 50px;
-    background-color: darkgreen;
+    background-color: var(--secondary-color);
     color: white;
     border: 10px black double;
     font-size: 75%;
     width: 125px;
 }
 
+#new-highscore button:hover {
+    background-color: var(--secondary-color);
+}
+
+#new-highscore button:active {
+    background-color: var(--secondary-darker-color);
+}
+
+
 #new-highscore input {
     margin-left: 50px;
     height: 30px;
-    background-color:rgb(74, 221, 37);
+    background-color: var(--tertiary-color);
 }
 
 #new-highscore h3 {
@@ -66,7 +90,7 @@ h4 {
 #navbar {
     width: 100vw;
     height: 50px;
-    background-color: rgb(15, 153, 15);
+    background-color: var(--secondary-color);
     margin-bottom: 20px;
     margin-top: 0px;
 }
@@ -76,7 +100,8 @@ select {
     margin-left: 40vw;
     height: 30px;
     width: 75px;
-    background-color:rgb(74, 221, 37);
+    background-color: var(--tertiary-color);
+    border: black solid 3px;
 }
 
 #navbar h3 {
@@ -92,7 +117,7 @@ select {
     display: grid;
     border: 10px solid black;
     margin: 0px auto;
-    background-color: darkgreen;
+    background-color: var(--container-color);
 }
 
 .spin {
@@ -101,7 +126,7 @@ select {
 }
 
 .tile {
-    background-color: rgb(74, 221, 37);
+    background-color: var(--tile-color);
     text-align: center;
     border: .5px black solid;
     font-size: 200%;
@@ -130,18 +155,22 @@ h1 {
     text-align: center;
 }
 
-#buttons button {
+#reset {
     padding: 10px 50px;
-    background-color: darkgreen;
+    background-color: var(--primary-color);
     color: white;
     border: 10px black double;
 }
 
-button:hover {
-    background-color: rgb(12, 113, 12);
+#reset:hover {
+    background-color: var(--secondary-color);
 }
 
-button:active {
-    background-color: darkgreen;
+#reset:active {
+    background-color: var(--secondary-darker-color);
+}
+
+hr {
+    border: 2px black solid;
 }
 
